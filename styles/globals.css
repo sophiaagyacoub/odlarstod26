@@ -1,0 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap');
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --soil: #2C1A0E;
+  --bark: #5C3D2E;
+  --moss: #4A6741;
+  --leaf: #7A9E6F;
+  --meadow: #B5C9A0;
+  --fog: #EDF0E8;
+  --cream: #F7F4EC;
+  --gold: #C9A84C;
+  --rust: #B85C38;
+  --sky: #8FB3C4;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--cream);
+  color: var(--soil);
+  font-family: 'DM Mono', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(74,103,65,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(181,201,160,0.1) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
