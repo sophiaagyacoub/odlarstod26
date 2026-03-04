@@ -10,21 +10,22 @@ const COUNTIES = [
 ]
 
 const PRODUCTION_TYPES = [
-  { value: 'vegetables', label: '🥦 Grönsaker & rotfrukter' },
+  { value: 'vegetables', label: '🥦 Grönsaker' },
   { value: 'grains', label: '🌾 Spannmål & baljväxter' },
   { value: 'fruits', label: '🍎 Frukt & bär' },
   { value: 'dairy', label: '🥛 Mjölk & mejeri' },
-  { value: 'meat', label: '🐄 Kött & ägg' },
+  { value: 'meat', label: '🐄 Kött' },
+  { value: 'eggs', label: '🥚 Ägg' },
   { value: 'herbs', label: '🌿 Örter & medicinalväxter' },
   { value: 'honey', label: '🍯 Honung & biodling' },
   { value: 'forest', label: '🍄 Skogsprodukter & svamp' },
   { value: 'processed', label: '🫙 Förädlade produkter' },
-  { value: 'aqua', label: '🐟 Fiske & vattenbruk' },
+  { value: 'aqua', label: '🐟 Fiske & vatten' },
 ]
 
 const SALES_CHANNELS = [
-  'Gårdsbutik','REKO-ring','Bondesmarknad','Restauranger',
-  'Dagligvaruhandel','Grossist','Direktleverans CSA','E-handel','Ännu ej försäljning'
+  'Gårdsbutik','REKO-ring','Bondens marknad','Restauranger',
+  'Dagligvaruhandel','Grossist','Direktleverans','E-handel','Ännu ej försäljning'
 ]
 
 const SUSTAINABILITY_METHODS = [
@@ -37,7 +38,7 @@ const SUSTAINABILITY_METHODS = [
   { value: 'pollinators', label: '🐝 Pollinatorvänliga miljöer' },
   { value: 'water', label: '💧 Vattenhushållning' },
   { value: 'renewable', label: '☀️ Förnybar energi på gården' },
-  { value: 'seeds', label: '🌾 Eget frö / gamla sorter' },
+  { value: 'seeds', label: '🌾 Eget frö / kultursorter' },
 ]
 
 const CHALLENGES = [
