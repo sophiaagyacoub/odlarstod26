@@ -14,6 +14,8 @@ export default async function handler(req, res) {
 
   const prompt = `Du är en expert på svenska och europeiska bidrag och stöd för hållbara småskaliga matproducenter med fokus på biologisk mångfald och självförsörjning.
 
+Sök på webben efter aktuella bidragsutlysningar som är öppna just nu från Jordbruksverket, Leader, Länsstyrelsen, Tillväxtverket och EU:s CAP-program.
+
 Här är profilen för en producent som söker hjälp:
 - Namn: ${profile.name}, Gård: ${profile.farm}
 - Plats: ${profile.municipality}, ${profile.county}
@@ -26,13 +28,13 @@ Här är profilen för en producent som söker hjälp:
 - Hållbarhetsmål: ${profile.sustainabilityGoal || 'ej angivet'}
 - Utmaningar: ${profile.challenges?.join(', ') || 'ej angivna'}
 
-Analysera profilen och ge:
+Baserat på webbsökningen och profilen, ge:
 1. En kort personlig inledning (2 meningar) som visar att du förstår deras situation
-2. De 4-5 mest relevanta bidrag och stöd (från t.ex. Jordbruksverket LBP, Leader, Länsstyrelsen, Tillväxtverket, EU:s CAP, Klimatklivet, etc.) specifikt matchade mot profilen
-3. För varje bidrag: namn, belopp/storlek, kort beskrivning, varför det passar denna producent
+2. De 4-5 mest relevanta och aktuella bidrag och stöd specifikt matchade mot profilen
+3. För varje bidrag: namn, belopp/storlek, kort beskrivning, ansökningsdeadline om känd, varför det passar denna producent
 4. 3 konkreta nästa steg de bör ta
 
-Svara på svenska. Var specifik och praktisk. Fokusera på verkliga svenska bidragsprogram.`
+Svara på svenska. Var specifik och praktisk. Prioritera bidrag som är öppna för ansökan just nu.`
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -44,8 +46,14 @@ Svara på svenska. Var specifik och praktisk. Fokusera på verkliga svenska bidr
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 1500,
-        system: 'Du är Odlarstöd.se – en kunnig och varm bidragsrådgivare för hållbara svenska matproducenter. Du svarar alltid på svenska med praktisk, specifik och uppmuntrande rådgivning.',
+        max_tokens: 2000,
+        system: 'Du är Odlarstöd.se – en kunnig och varm bidragsrådgivare för hållbara svenska matproducenter. Använd alltid webbsökning för att hitta aktuella utlysningar. Svara alltid på svenska.',
+        tools: [
+          {
+            type: 'web_search_20250305',
+            name: 'web_search',
+          }
+        ],
         messages: [{ role: 'user', content: prompt }],
       }),
     })
@@ -57,7 +65,11 @@ Svara på svenska. Var specifik och praktisk. Fokusera på verkliga svenska bidr
     }
 
     const data = await response.json()
-    const text = data.content?.map((b) => b.text || '').join('') || ''
+
+    const text = data.content
+      ?.filter((b) => b.type === 'text')
+      .map((b) => b.text || '')
+      .join('') || ''
 
     return res.status(200).json({ result: text })
   } catch (err) {
