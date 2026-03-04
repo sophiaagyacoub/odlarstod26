@@ -150,8 +150,8 @@ export default function Home() {
               <span className={styles.logoIcon}>🌾</span>
               <span className={styles.logoText}>Odlarstöd.se</span>
             </div>
-            <div className={styles.logoSub}>Bidragsagent för hållbara matproducenter</div>
-            <div className={styles.tagline}>Stärker den biologiska mångfalden och Sveriges självförsörjning</div>
+            <div className={styles.logoSub}>Hitta bidrag för småskaliga hållbara matproducenter</div>
+            <div className={styles.tagline}>För oss som kämpar för att öka den biologiska mångfalden och Sveriges självförsörjning</div>
           </header>
 
           {/* STEPS BAR */}
