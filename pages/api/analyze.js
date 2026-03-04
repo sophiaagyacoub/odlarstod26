@@ -31,7 +31,7 @@ Här är profilen för en producent som söker hjälp:
 Baserat på webbsökningen och profilen, ge:
 1. En kort personlig inledning (2 meningar) som visar att du förstår deras situation
 2. De 4-5 mest relevanta och aktuella bidrag och stöd specifikt matchade mot profilen
-3. För varje bidrag: namn, belopp/storlek, kort beskrivning, ansökningsdeadline om känd, varför det passar denna producent
+3. För varje bidrag: namn, vem som utlyser det, belopp/storlek, kort beskrivning, länk till utlysningen, var man ansöker, ansökningsdeadline om känd, varför det passar denna producent
 4. 3 konkreta nästa steg de bör ta
 
 Svara på svenska. Var specifik och praktisk. Prioritera bidrag som är öppna för ansökan just nu.`
