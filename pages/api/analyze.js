@@ -1,545 +1,284 @@
-import Head from 'next/head'
-import { useState } from 'react'
-import styles from '../styles/Home.module.css'
+// pages/api/analyze.js
+// Statisk bidragsdatabas + Claude Haiku för analys = billigt och tillförlitligt
 
-const COUNTIES = [
-  'Blekinge','Dalarna','Gotland','Gävleborg','Halland','Jämtland',
-  'Jönköping','Kalmar','Kronoberg','Norrbotten','Skåne','Stockholm',
-  'Södermanland','Uppsala','Värmland','Västerbotten','Västernorrland',
-  'Västmanland','Västra Götaland','Örebro','Östergötland'
+const BIDRAG = [
+  // ─── EU / CAP-stöd via Jordbruksverket ───
+  {
+    id: 'gardsstod',
+    namn: 'Gårdsstöd',
+    utlysare: 'Jordbruksverket (EU/CAP)',
+    belopp: 'ca 134–147 euro/hektar (2025)',
+    deadline: '9 april 2026',
+    ansokan: 'SAM Internet (jordbruksverket.se/sam)',
+    lank: 'https://jordbruksverket.se/stod/jordbruk-tradgard-och-rennaring/jordbruksmark/gardsstod',
+    beskrivning: 'Arealstöd för dig som brukar jordbruksmark. Bidrar till ökad konkurrenskraft och öppet landskap.',
+    taggar: ['åkermark', 'betesmark', 'alla', 'EU'],
+  },
+  {
+    id: 'ekostod',
+    namn: 'Ersättning för ekologisk produktion',
+    utlysare: 'Jordbruksverket (EU/CAP)',
+    belopp: 'ca 1 000–3 600 kr/hektar beroende på produktion',
+    deadline: '9 april 2026',
+    ansokan: 'SAM Internet (jordbruksverket.se/sam)',
+    lank: 'https://jordbruksverket.se/stod/jordbruk-tradgard-och-rennaring/miljoersattningar-ersattningar-och-kompensationsstod/ekologisk-produktion',
+    beskrivning: 'Ersättning för certifierad ekologisk växtodling eller djurhållning, samt vid omställning till ekologisk produktion.',
+    taggar: ['ekologisk', 'hållbarhet', 'miljö', 'EU'],
+  },
+  {
+    id: 'blommande_aker',
+    namn: 'Miljöersättning för blommande åker och fältkant',
+    utlysare: 'Jordbruksverket (EU/CAP)',
+    belopp: 'Varierar per region (3 geografiska zoner)',
+    deadline: '9 april 2026',
+    ansokan: 'SAM Internet (jordbruksverket.se/sam)',
+    lank: 'https://jordbruksverket.se/stod/jordbruk-tradgard-och-rennaring/miljoersattningar-ersattningar-och-kompensationsstod/blommande-aker',
+    beskrivning: 'Ersättning för att odla pollen- och nektarrika örter på åkermark. Minst 3 godkända arter krävs.',
+    taggar: ['pollinerare', 'biologisk mångfald', 'hållbarhet', 'blommor', 'insekter', 'EU'],
+  },
+  {
+    id: 'betesmarker',
+    namn: 'Miljöersättning för betesmarker och slåtterängar',
+    utlysare: 'Jordbruksverket (EU/CAP)',
+    belopp: 'ca 1 000–4 500 kr/hektar',
+    deadline: '9 april 2026',
+    ansokan: 'SAM Internet (jordbruksverket.se/sam)',
+    lank: 'https://jordbruksverket.se/stod/jordbruk-tradgard-och-rennaring/miljoersattningar-ersattningar-och-kompensationsstod/betesmarker-och-slatterangar',
+    beskrivning: 'Ersättning för skötsel av betesmarker och slåtterängar med höga naturvärden.',
+    taggar: ['betesmark', 'biologisk mångfald', 'natur', 'djur', 'EU'],
+  },
+  {
+    id: 'minskat_kvave',
+    namn: 'Miljöersättning för minskat kväveläckage',
+    utlysare: 'Jordbruksverket (EU/CAP)',
+    belopp: 'ca 1 400 kr/hektar',
+    deadline: '9 april 2026',
+    ansokan: 'SAM Internet (jordbruksverket.se/sam)',
+    lank: 'https://jordbruksverket.se/stod/jordbruk-tradgard-och-rennaring/miljoersattningar-ersattningar-och-kompensationsstod/minskat-kvaveutlakage',
+    beskrivning: 'Ersättning för att odla fånggrödor eller mellangrödor för att minska kväveläckage till vattendrag.',
+    taggar: ['miljö', 'vatten', 'hållbarhet', 'klimat', 'EU'],
+  },
+  {
+    id: 'vaatmarker',
+    namn: 'Stöd för anläggning av våtmarker',
+    utlysare: 'Jordbruksverket / Länsstyrelsen (EU/CAP)',
+    belopp: 'upp till 90% av anläggningskostnaden',
+    deadline: 'Löpande ansökan via Länsstyrelsen',
+    ansokan: 'Ansökan via din Länsstyrelse',
+    lank: 'https://jordbruksverket.se/stod/jordbruk-tradgard-och-rennaring/natur-och-kulturmiljoatgarder/anlaggning-av-vatmark',
+    beskrivning: 'Stöd för att anlägga våtmarker som gynnar biologisk mångfald, minskar kväveläckage och ökar vattenhållning.',
+    taggar: ['biologisk mångfald', 'vatten', 'miljö', 'hållbarhet', 'natur', 'EU'],
+  },
+  {
+    id: 'investeringsstod',
+    namn: 'Investeringsstöd för ökad konkurrenskraft',
+    utlysare: 'Jordbruksverket / Länsstyrelsen (EU/CAP)',
+    belopp: '30–40% av godkända utgifter (min. 200 000 kr i utgifter)',
+    deadline: 'Löpande ansökan, handläggningstid ca 5 månader',
+    ansokan: 'Ansökan via din Länsstyrelse',
+    lank: 'https://jordbruksverket.se/stod/jordbruk-tradgard-och-rennaring/investeringsstod-for-jordbruk-tradgard-och-rennaring/okad-konkurrenskraft',
+    beskrivning: 'Stöd för investeringar i djurstall, växthus, energiskog, täckdikning m.m.',
+    taggar: ['investering', 'byggnad', 'infrastruktur', 'djur', 'trädgård', 'EU'],
+  },
+  {
+    id: 'ung_jordbrukare',
+    namn: 'Stöd till unga jordbrukare',
+    utlysare: 'Jordbruksverket (EU/CAP)',
+    belopp: 'Extra arealstöd + 40% vid investeringsstöd',
+    deadline: '9 april 2026',
+    ansokan: 'SAM Internet (jordbruksverket.se/sam)',
+    lank: 'https://jordbruksverket.se/stod/jordbruk-tradgard-och-rennaring/stod-till-unga-jordbrukare',
+    beskrivning: 'För dig som är 40 år eller yngre och startat jordbruksföretag för första gången.',
+    taggar: ['ung', 'nystart', 'EU'],
+  },
+  {
+    id: 'kompensationsstod',
+    namn: 'Kompensationsstöd för mindre gynnade områden',
+    utlysare: 'Jordbruksverket (EU/CAP)',
+    belopp: 'ca 600–1 400 kr/hektar',
+    deadline: '9 april 2026',
+    ansokan: 'SAM Internet (jordbruksverket.se/sam)',
+    lank: 'https://jordbruksverket.se/stod/jordbruk-tradgard-och-rennaring/miljoersattningar-ersattningar-och-kompensationsstod/kompensationsstod',
+    beskrivning: 'Kompensation för sämre naturliga förutsättningar i bergs- och mellanbygd.',
+    taggar: ['mellanbygd', 'bergsbygd', 'norrland', 'EU'],
+  },
+
+  // ─── Nationella stöd ───
+  {
+    id: 'klimatklivet',
+    namn: 'Klimatklivet',
+    utlysare: 'Naturvårdsverket (nationellt)',
+    belopp: 'upp till 70% av investeringskostnaden',
+    deadline: 'Löpande utlysningar, se naturvardsverket.se',
+    ansokan: 'naturvardsverket.se/klimatklivet',
+    lank: 'https://www.naturvardsverket.se/klimatklivet',
+    beskrivning: 'Stöd för investeringar som minskar utsläpp av växthusgaser, t.ex. biogasanläggning, solceller, laddinfrastruktur.',
+    taggar: ['klimat', 'energi', 'solceller', 'biogas', 'hållbarhet', 'nationell'],
+  },
+  {
+    id: 'lbx_foradling',
+    namn: 'Investeringsstöd för förädling och försäljning',
+    utlysare: 'Jordbruksverket / Länsstyrelsen (nationellt)',
+    belopp: '30–40% av godkända kostnader',
+    deadline: 'Löpande ansökan via Länsstyrelsen',
+    ansokan: 'Ansökan via din Länsstyrelse',
+    lank: 'https://jordbruksverket.se/stod/jordbruk-tradgard-och-rennaring/investeringsstod-for-jordbruk-tradgard-och-rennaring/foradling-och-forsaljning',
+    beskrivning: 'Stöd för investeringar i lokaler och utrustning för att förädla och sälja jordbruksprodukter.',
+    taggar: ['förädling', 'försäljning', 'gårdsbutik', 'investering', 'nationell'],
+  },
+
+  // ─── Leader / EJFLU ───
+  {
+    id: 'leader',
+    namn: 'Leader – lokalt ledd utveckling',
+    utlysare: 'Leader LAG-grupper (EU/nationellt)',
+    belopp: 'Varierar, ofta 50 000–500 000 kr per projekt',
+    deadline: 'Varierar per LAG-grupp, kontakta din lokala Leader-grupp',
+    ansokan: 'Via din lokala Leader LAG-grupp (leadersverige.se)',
+    lank: 'https://leadersverige.se',
+    beskrivning: 'Finansiering för lokala utvecklingsprojekt på landsbygden. Brett tillämpningsområde – innovation, samarbete, miljö, turism.',
+    taggar: ['projekt', 'landsbygd', 'samarbete', 'innovation', 'EU', 'nationell'],
+  },
+  {
+    id: 'eip_agri',
+    namn: 'EIP-Agri – Europeiskt innovationspartnerskap',
+    utlysare: 'Jordbruksverket / Länsstyrelsen (EU)',
+    belopp: 'upp till 70% av projektkostnader',
+    deadline: 'Löpande utlysningar via Jordbruksverket',
+    ansokan: 'jordbruksverket.se/eip',
+    lank: 'https://jordbruksverket.se/stod/landsbygd-och-miljo/eip-agri',
+    beskrivning: 'Stöd för innovativa samarbetsprojekt mellan lantbrukare, forskare och rådgivare.',
+    taggar: ['innovation', 'forskning', 'samarbete', 'hållbarhet', 'EU'],
+  },
+
+  // ─── Tillväxtverket ───
+  {
+    id: 'regionalt_bidrag',
+    namn: 'Regionalt investeringsbidrag',
+    utlysare: 'Tillväxtverket (nationellt)',
+    belopp: 'upp till 35% av investeringskostnaden',
+    deadline: 'Löpande ansökan',
+    ansokan: 'verksamt.se eller tillvaxtverket.se',
+    lank: 'https://www.tillvaxtverket.se/svenska/finansiering.html',
+    beskrivning: 'Bidrag för företag i stödområden som investerar och skapar sysselsättning.',
+    taggar: ['investering', 'företag', 'landsbygd', 'sysselsättning', 'nationell'],
+  },
+  {
+    id: 'livsmedelsstrategin',
+    namn: 'Livsmedelsstrategi – korta livsmedelskedjor',
+    utlysare: 'Jordbruksverket / Länsstyrelsen (nationellt)',
+    belopp: 'Varierar per utlysning',
+    deadline: 'Se jordbruksverket.se för aktuella utlysningar',
+    ansokan: 'Via Länsstyrelsen',
+    lank: 'https://jordbruksverket.se/stod/landsbygd-och-miljo/livsmedelsstrategin',
+    beskrivning: 'Stöd för projekt som stärker lokala livsmedelskedjor, direktförsäljning och samarbeten.',
+    taggar: ['livsmedel', 'lokal', 'REKO-ring', 'gårdsbutik', 'bondens marknad', 'direktförsäljning', 'nationell'],
+  },
+  {
+    id: 'biodling',
+    namn: 'Stöd till biodling',
+    utlysare: 'Jordbruksverket (EU/nationellt)',
+    belopp: 'Varierar per åtgärd',
+    deadline: 'Se jordbruksverket.se',
+    ansokan: 'SAM Internet (jordbruksverket.se/sam)',
+    lank: 'https://jordbruksverket.se/stod/jordbruk-tradgard-och-rennaring/biodling',
+    beskrivning: 'Stöd för bin och biodling, inkl. stöd för att bekämpa varroa och för utbildning.',
+    taggar: ['biodling', 'honung', 'pollinerare', 'bin', 'EU'],
+  },
 ]
 
-const PRODUCTION_TYPES = [
-  { value: 'vegetables', label: '🥦 Grönsaker & rotfrukter' },
-  { value: 'grains', label: '🌾 Spannmål & baljväxter' },
-  { value: 'fruits', label: '🍎 Frukt & bär' },
-  { value: 'dairy', label: '🥛 Mjölk & mejeri' },
-  { value: 'meat', label: '🐄 Kött & ägg' },
-  { value: 'herbs', label: '🌿 Örter & medicinalväxter' },
-  { value: 'honey', label: '🍯 Honung & biodling' },
-  { value: 'forest', label: '🍄 Skogsprodukter & svamp' },
-  { value: 'processed', label: '🫙 Förädlade produkter' },
-  { value: 'aqua', label: '🐟 Fiske & vattenbruk' },
-]
-
-const SALES_CHANNELS = [
-  'Gårdsbutik','REKO-ring','Bondens marknad','Restauranger',
-  'Dagligvaruhandel','Grossist','Direktleverans CSA','E-handel','Ännu ej försäljning'
-]
-
-const SUSTAINABILITY_METHODS = [
-  { value: 'organic', label: '🌿 KRAV/ekologisk certifiering' },
-  { value: 'biodynamic', label: '☽ Biodynamisk odling' },
-  { value: 'permaculture', label: '🔄 Permakultur' },
-  { value: 'agroforestry', label: '🌳 Skogsjordbruk / agroforestry' },
-  { value: 'no-till', label: '🪱 Skonsam jordbearbetning' },
-  { value: 'cover-crops', label: '🌱 Mellangrödor & fånggrödor' },
-  { value: 'pollinators', label: '🐝 Pollinatorvänliga miljöer' },
-  { value: 'water', label: '💧 Vattenhushållning' },
-  { value: 'renewable', label: '☀️ Förnybar energi på gården' },
-  { value: 'seeds', label: '🌾 Eget frö / gamla sorter' },
-]
-
-const CHALLENGES = [
-  'Finansiering','Kunskap & kompetens','Markåtkomst','Byråkrati & administration',
-  'Marknad & avsättning','Klimat & väder','Arbetsinsats','Maskiner & utrustning'
-]
-
-export default function Home() {
-  const [screen, setScreen] = useState(1)
-  const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState('')
-  const [copied, setCopied] = useState(false)
-  const [topBidrag, setTopBidrag] = useState([])
-  const [selectedBidrag, setSelectedBidrag] = useState(null)
-  const [application, setApplication] = useState('')
-  const [appLoading, setAppLoading] = useState(false)
-  const [appCopied, setAppCopied] = useState(false)
-
-  // Form state
-  const [name, setName] = useState('')
-  const [farm, setFarm] = useState('')
-  const [municipality, setMunicipality] = useState('')
-  const [county, setCounty] = useState('')
-  const [area, setArea] = useState(5)
-  const [orgType, setOrgType] = useState('')
-  const [production, setProduction] = useState([])
-  const [salesChannels, setSalesChannels] = useState([])
-  const [turnover, setTurnover] = useState('')
-  const [sustainabilityMethods, setSustainabilityMethods] = useState([])
-  const [sustainabilityGoal, setSustainabilityGoal] = useState('')
-  const [challenges, setChallenges] = useState([])
-
-  function toggleArr(arr, setArr, val) {
-    setArr(arr.includes(val) ? arr.filter(v => v !== val) : [...arr, val])
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  async function runAnalysis() {
-    setScreen(4)
-    setLoading(true)
-    setResult('')
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+  const { profile } = req.body
 
-    try {
-      const res = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          profile: {
-            name: name || 'Producent',
-            farm: farm || 'Din gård',
-            municipality: municipality || 'okänd kommun',
-            county: county || 'okänt län',
-            area: area + ' ha',
-            orgType: orgType || 'ej angiven',
-            production,
-            salesChannels,
-            turnover: turnover || 'ej angiven',
-            sustainabilityMethods,
-            sustainabilityGoal,
-            challenges,
-          }
-        })
-      })
-      const data = await res.json()
-      setResult(data.result || data.error || 'Kunde inte hämta analys.')
-      setTopBidrag(data.topBidrag || [])
-    } catch {
-      setResult('Något gick fel. Kontrollera din internetanslutning och försök igen.')
-    } finally {
-      setLoading(false)
-    }
+  if (!profile) {
+    return res.status(400).json({ error: 'Profil saknas' })
   }
 
-  function reset() {
-    setScreen(1); setResult(''); setName(''); setFarm(''); setMunicipality('')
-    setCounty(''); setArea(5); setOrgType(''); setProduction([]); setSalesChannels([])
-    setTurnover(''); setSustainabilityMethods([]); setSustainabilityGoal(''); setChallenges([])
-    setTopBidrag([]); setSelectedBidrag(null); setApplication(''); setAppLoading(false)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+  // Bygg en sökbar text från profilen
+  const profilText = [
+    profile.production?.join(' ') || '',
+    profile.sustainabilityMethods?.join(' ') || '',
+    profile.sustainabilityGoal || '',
+    profile.challenges?.join(' ') || '',
+    profile.salesChannels?.join(' ') || '',
+    profile.county || '',
+    profile.orgType || '',
+  ].join(' ').toLowerCase()
 
-  async function generateApplication(bidrag) {
-    setSelectedBidrag(bidrag)
-    setApplication('')
-    setScreen(5)
-    setAppLoading(true)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-    try {
-      const res = await fetch('/api/application', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          profile: {
-            name: name || 'Producent',
-            farm: farm || 'Din gård',
-            municipality: municipality || 'okänd kommun',
-            county: county || 'okänt län',
-            area: area + ' ha',
-            orgType: orgType || 'ej angiven',
-            production,
-            salesChannels,
-            turnover: turnover || 'ej angiven',
-            sustainabilityMethods,
-            sustainabilityGoal,
-            challenges,
-          },
-          bidrag,
-        })
-      })
-      const data = await res.json()
-      setApplication(data.result || data.error || 'Kunde inte generera ansökan.')
-    } catch {
-      setApplication('Något gick fel. Försök igen.')
-    } finally {
-      setAppLoading(false)
-    }
-  }
-
-  function downloadDocx() {
-    const text = application
-    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `ansökan-${selectedBidrag?.namn?.replace(/\s+/g, '-') || 'bidrag'}.txt`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
-
-  function copyResult() {
-    navigator.clipboard.writeText(result).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+  // Poängsätt varje bidrag mot profilen
+  const rankadeBidrag = BIDRAG.map((b) => {
+    let poang = 0
+    b.taggar.forEach((tag) => {
+      if (profilText.includes(tag.toLowerCase())) poang += 2
     })
+    // Alla får minst 1 poäng (generella stöd visas alltid)
+    if (['gardsstod', 'leader', 'ekostod'].includes(b.id)) poang += 1
+    return { ...b, poang }
+  })
+    .sort((a, b) => b.poang - a.poang)
+    .slice(0, 6)
+
+  const bidragJson = JSON.stringify(rankadeBidrag, null, 2)
+
+  const prompt = `Du är en varm och kunnig bidragsrådgivare på Odlarstöd.se.
+
+Här är profilen för en producent:
+- Namn: ${profile.name}, Gård: ${profile.farm}
+- Plats: ${profile.municipality}, ${profile.county}
+- Areal: ${profile.area} hektar
+- Organisationsform: ${profile.orgType}
+- Produktion: ${profile.production?.join(', ') || 'ej angiven'}
+- Försäljningskanaler: ${profile.salesChannels?.join(', ') || 'ej angivna'}
+- Omsättning: ${profile.turnover}
+- Hållbarhetsmetoder: ${profile.sustainabilityMethods?.join(', ') || 'inga angivna'}
+- Hållbarhetsmål: ${profile.sustainabilityGoal || 'ej angivet'}
+- Utmaningar: ${profile.challenges?.join(', ') || 'ej angivna'}
+
+Här är de mest relevanta bidragen för denna producent:
+${bidragJson}
+
+Skriv en personlig och uppmuntrande bidragsanalys på svenska med:
+1. En kort personlig inledning (2 meningar) som visar att du förstår deras situation
+2. För varje bidrag: förklara varför det passar just denna producent, nämn utlysaren, beloppet, ansökningsdeadline och länken
+3. Avsluta med 3 konkreta nästa steg
+
+Var specifik, varm och praktisk. Formatera tydligt med rubriker för varje bidrag.`
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1500,
+        system: 'Du är Odlarstöd.se – en kunnig och varm bidragsrådgivare för hållbara svenska matproducenter. Svara alltid på svenska.',
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    })
+
+    if (!response.ok) {
+      const error = await response.json()
+      console.error('Anthropic API error:', error)
+      return res.status(500).json({ error: 'Kunde inte kontakta AI-tjänsten' })
+    }
+
+    const data = await response.json()
+    const text = data.content
+      ?.filter((b) => b.type === 'text')
+      .map((b) => b.text || '')
+      .join('') || ''
+
+    return res.status(200).json({ result: text, topBidrag: rankadeBidrag.slice(0, 3) })
+  } catch (err) {
+    console.error('Server error:', err)
+    return res.status(500).json({ error: 'Serverfel, försök igen' })
   }
-
-  function formatResult(text) {
-    return text
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/^#{1,3} (.+)$/gm, '<h3 class="aiH3">$1</h3>')
-      .split('\n\n')
-      .map(p => p.trim())
-      .filter(Boolean)
-      .map(p => p.startsWith('<h3') ? p : `<p>${p.replace(/\n/g, '<br/>')}</p>`)
-      .join('')
-  }
-
-  return (
-    <>
-      <Head>
-        <title>Odlarstöd.se – Bidragsagent för hållbara matproducenter</title>
-        <meta name="description" content="Hitta rätt bidrag och stöd för din hållbara matproduktion i Sverige. AI-driven analys matchad till din gård." />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <div className={styles.page}>
-        {/* GRAIN TEXTURE */}
-        <div className={styles.grain} />
-
-        <div className={styles.container}>
-          {/* HEADER */}
-          <header className={styles.header}>
-            <div className={styles.logoArea}>
-              <span className={styles.logoIcon}>🌾</span>
-              <span className={styles.logoText}>Odlarstöd.se</span>
-            </div>
-            <div className={styles.logoSub}>Bidragsagent för hållbara matproducenter</div>
-            <div className={styles.tagline}>Stärker den biologiska mångfalden och Sveriges självförsörjning</div>
-          </header>
-
-          {/* STEPS BAR */}
-          <div className={styles.stepsBar}>
-            {['01 Profil', '02 Verksamhet', '03 Hållbarhet', '04 Bidrag'].map((label, i) => (
-              <div
-                key={i}
-                className={[
-                  styles.stepItem,
-                  screen === i + 1 ? styles.stepActive : '',
-                  screen > i + 1 ? styles.stepDone : ''
-                ].join(' ')}
-              >
-                {label}
-              </div>
-            ))}
-          </div>
-
-          {/* ── SCREEN 1: PROFIL ── */}
-          {screen === 1 && (
-            <div className={styles.screen}>
-              <h2 className={styles.sectionTitle}>Berätta om dig och din gård</h2>
-              <p className={styles.sectionDesc}>Vi börjar med grundläggande information för att hitta rätt bidrag för dig.</p>
-
-              <div className={styles.card}>
-                <div className={styles.fieldRow}>
-                  <Field label="Ditt namn">
-                    <input className={styles.input} value={name} onChange={e => setName(e.target.value)} placeholder="Anna Lindgren" />
-                  </Field>
-                  <Field label="Gård / Företagsnamn">
-                    <input className={styles.input} value={farm} onChange={e => setFarm(e.target.value)} placeholder="Lindgrens Ekogård" />
-                  </Field>
-                </div>
-                <div className={styles.fieldRow}>
-                  <Field label="Kommun">
-                    <input className={styles.input} value={municipality} onChange={e => setMunicipality(e.target.value)} placeholder="t.ex. Östersund" />
-                  </Field>
-                  <Field label="Län">
-                    <select className={styles.input} value={county} onChange={e => setCounty(e.target.value)}>
-                      <option value="">Välj län...</option>
-                      {COUNTIES.map(c => <option key={c}>{c}</option>)}
-                    </select>
-                  </Field>
-                </div>
-                <div className={styles.fieldGroup}>
-                  <label className={styles.label}>Gårdens areal (hektar)</label>
-                  <div className={styles.rangeValue}>{area} ha</div>
-                  <input type="range" className={styles.range} min="0.5" max="200" step="0.5"
-                    value={area} onChange={e => setArea(Number(e.target.value))} />
-                  <div className={styles.rangeLabels}><span>0.5 ha</span><span>50 ha</span><span>200+ ha</span></div>
-                </div>
-                <Field label="Organisationsform">
-                  <select className={styles.input} value={orgType} onChange={e => setOrgType(e.target.value)}>
-                    <option value="">Välj form...</option>
-                    {['Enskild firma','Handelsbolag','Aktiebolag','Ekonomisk förening','Ideell förening','Stiftelse','Ännu ej registrerat – under uppstart'].map(o => <option key={o}>{o}</option>)}
-                  </select>
-                </Field>
-              </div>
-
-              <BtnRow right={<button className={styles.btnPrimary} onClick={() => { setScreen(2); window.scrollTo({top:0,behavior:'smooth'}) }}>Nästa steg →</button>} />
-            </div>
-          )}
-
-          {/* ── SCREEN 2: VERKSAMHET ── */}
-          {screen === 2 && (
-            <div className={styles.screen}>
-              <h2 className={styles.sectionTitle}>Vad producerar du?</h2>
-              <p className={styles.sectionDesc}>Välj de produktionskategorier som stämmer för din verksamhet (flera val möjliga).</p>
-
-              <div className={styles.card}>
-                <label className={styles.label}>Produktionskategorier</label>
-                <div className={styles.checkGrid}>
-                  {PRODUCTION_TYPES.map(({ value, label }) => (
-                    <CheckItem key={value} label={label} checked={production.includes(value)}
-                      onChange={() => toggleArr(production, setProduction, value)} />
-                  ))}
-                </div>
-              </div>
-
-              <div className={styles.card}>
-                <div className={styles.fieldGroup}>
-                  <label className={styles.label}>Nuvarande försäljningskanaler</label>
-                  <div className={styles.tags}>
-                    {SALES_CHANNELS.map(ch => (
-                      <button key={ch}
-                        className={[styles.tag, salesChannels.includes(ch) ? styles.tagActive : ''].join(' ')}
-                        onClick={() => toggleArr(salesChannels, setSalesChannels, ch)}>{ch}</button>
-                    ))}
-                  </div>
-                </div>
-                <Field label="Ungefärlig årsomsättning (SEK)">
-                  <select className={styles.input} value={turnover} onChange={e => setTurnover(e.target.value)}>
-                    <option value="">Välj intervall...</option>
-                    <option value="0">0 – under uppstart</option>
-                    <option value="under100k">Under 100 000 kr</option>
-                    <option value="100-500k">100 000 – 500 000 kr</option>
-                    <option value="500k-1m">500 000 – 1 000 000 kr</option>
-                    <option value="1-5m">1 – 5 miljoner kr</option>
-                    <option value="over5m">Över 5 miljoner kr</option>
-                  </select>
-                </Field>
-              </div>
-
-              <BtnRow
-                left={<button className={styles.btnSecondary} onClick={() => { setScreen(1); window.scrollTo({top:0,behavior:'smooth'}) }}>← Tillbaka</button>}
-                right={<button className={styles.btnPrimary} onClick={() => { setScreen(3); window.scrollTo({top:0,behavior:'smooth'}) }}>Nästa steg →</button>}
-              />
-            </div>
-          )}
-
-          {/* ── SCREEN 3: HÅLLBARHET ── */}
-          {screen === 3 && (
-            <div className={styles.screen}>
-              <h2 className={styles.sectionTitle}>Din hållbarhetsprofil</h2>
-              <p className={styles.sectionDesc}>Berätta om dina metoder och mål. Ju mer du delar, desto bättre matchning får du.</p>
-
-              <div className={styles.card}>
-                <label className={styles.label}>Nuvarande hållbarhetsmetoder (välj alla som gäller)</label>
-                <div className={styles.checkGrid}>
-                  {SUSTAINABILITY_METHODS.map(({ value, label }) => (
-                    <CheckItem key={value} label={label} checked={sustainabilityMethods.includes(value)}
-                      onChange={() => toggleArr(sustainabilityMethods, setSustainabilityMethods, value)} />
-                  ))}
-                </div>
-              </div>
-
-              <div className={styles.card}>
-                <Field label="Beskriv ditt viktigaste hållbarhetsprojekt eller mål">
-                  <textarea className={styles.textarea} value={sustainabilityGoal}
-                    onChange={e => setSustainabilityGoal(e.target.value)}
-                    placeholder="T.ex: Vi vill anlägga en blomsterremsa längs hela åkermarken för att gynna pollinerare..." />
-                </Field>
-                <div className={styles.fieldGroup}>
-                  <label className={styles.label}>Vilka utmaningar möter du?</label>
-                  <div className={styles.tags}>
-                    {CHALLENGES.map(ch => (
-                      <button key={ch}
-                        className={[styles.tag, challenges.includes(ch) ? styles.tagActive : ''].join(' ')}
-                        onClick={() => toggleArr(challenges, setChallenges, ch)}>{ch}</button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <BtnRow
-                left={<button className={styles.btnSecondary} onClick={() => { setScreen(2); window.scrollTo({top:0,behavior:'smooth'}) }}>← Tillbaka</button>}
-                right={<button className={styles.btnPrimary} onClick={runAnalysis}>Analysera bidrag →</button>}
-              />
-            </div>
-          )}
-
-          {/* ── SCREEN 4: RESULTAT ── */}
-          {screen === 4 && (
-            <div className={styles.screen}>
-              <h2 className={styles.sectionTitle}>Dina bidragsmöjligheter</h2>
-              <p className={styles.sectionDesc}>Baserat på din profil analyserar agenten relevanta bidrag och stöd.</p>
-
-              {loading && (
-                <div className={styles.card} style={{ textAlign: 'center', padding: '48px' }}>
-                  <div className={styles.loadingDots}>
-                    <span /><span /><span />
-                  </div>
-                  <div style={{ marginTop: '16px', fontSize: '12px', opacity: 0.6 }}>
-                    Analyserar din profil och söker igenom Jordbruksverket, Leader, Region & EU-fonder...
-                  </div>
-                </div>
-              )}
-
-              {!loading && result && (
-                <div className={styles.aiResponse}>
-                  <div className={styles.aiLabel}>
-                    <span className={styles.aiDot} />
-                    Bidragsanalys för {farm || 'din gård'}
-                  </div>
-                  <div
-                    className={styles.aiContent}
-                    dangerouslySetInnerHTML={{ __html: formatResult(result) }}
-                  />
-                  <div className={styles.resultActions}>
-                    <button className={styles.actionCard} onClick={copyResult}>
-                      <div className={styles.actionIcon}>{copied ? '✓' : '📋'}</div>
-                      <div className={styles.actionLabel}>{copied ? 'Kopierad!' : 'Kopiera analys'}</div>
-                    </button>
-                    <button className={styles.actionCard} onClick={() => window.print()}>
-                      <div className={styles.actionIcon}>🖨️</div>
-                      <div className={styles.actionLabel}>Skriv ut</div>
-                    </button>
-                    <button className={styles.actionCard} onClick={reset}>
-                      <div className={styles.actionIcon}>🔄</div>
-                      <div className={styles.actionLabel}>Ny sökning</div>
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {!loading && topBidrag.length > 0 && (
-                <div style={{ marginTop: '24px' }}>
-                  <div style={{ fontSize: '11px', letterSpacing: '1.5px', textTransform: 'uppercase', color: 'var(--bark)', marginBottom: '12px' }}>
-                    ✍️ Skriv ansökningsutkast
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {topBidrag.map((b, i) => (
-                      <button key={i} onClick={() => generateApplication(b)} style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        padding: '14px 16px', background: 'var(--cream)',
-                        border: '1px solid rgba(74,103,65,0.25)', borderRadius: '6px',
-                        cursor: 'pointer', textAlign: 'left', fontFamily: 'DM Mono, monospace'
-                      }}>
-                        <span style={{ fontSize: '12px', color: 'var(--soil)' }}>{b.namn}</span>
-                        <span style={{ fontSize: '11px', color: 'var(--moss)', whiteSpace: 'nowrap', marginLeft: '12px' }}>Skriv utkast →</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <BtnRow
-                left={<button className={styles.btnSecondary} onClick={() => { setScreen(3); window.scrollTo({top:0,behavior:'smooth'}) }}>← Ändra uppgifter</button>}
-              />
-            </div>
-          )}
-
-          {/* ── SCREEN 5: ANSÖKAN ── */}
-          {screen === 5 && (
-            <div className={styles.screen}>
-              <h2 className={styles.sectionTitle}>Ansökningsutkast</h2>
-              <p className={styles.sectionDesc}>{selectedBidrag?.namn} – {selectedBidrag?.utlysare}</p>
-
-              {appLoading && (
-                <div className={styles.card} style={{ textAlign: 'center', padding: '48px' }}>
-                  <div className={styles.loadingDots}><span /><span /><span /></div>
-                  <div style={{ marginTop: '16px', fontSize: '12px', opacity: 0.6 }}>
-                    Skriver ansökningsutkast med dina gårdsuppgifter...
-                  </div>
-                </div>
-              )}
-
-              {!appLoading && application && (
-                <div className={styles.aiResponse}>
-                  <div className={styles.aiLabel}>
-                    <span className={styles.aiDot} />
-                    Utkast för {farm || 'din gård'}
-                  </div>
-                  <div
-                    className={styles.aiContent}
-                    dangerouslySetInnerHTML={{ __html: formatResult(application) }}
-                  />
-                  <div className={styles.resultActions}>
-                    <button className={styles.actionCard} onClick={() => {
-                      navigator.clipboard.writeText(application).then(() => {
-                        setAppCopied(true); setTimeout(() => setAppCopied(false), 2000)
-                      })
-                    }}>
-                      <div className={styles.actionIcon}>{appCopied ? '✓' : '📋'}</div>
-                      <div className={styles.actionLabel}>{appCopied ? 'Kopierad!' : 'Kopiera text'}</div>
-                    </button>
-                    <button className={styles.actionCard} onClick={downloadDocx}>
-                      <div className={styles.actionIcon}>📄</div>
-                      <div className={styles.actionLabel}>Ladda ner</div>
-                    </button>
-                    <button className={styles.actionCard} onClick={() => window.print()}>
-                      <div className={styles.actionIcon}>🖨️</div>
-                      <div className={styles.actionLabel}>Skriv ut</div>
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              <BtnRow
-                left={<button className={styles.btnSecondary} onClick={() => { setScreen(4); window.scrollTo({top:0,behavior:'smooth'}) }}>← Tillbaka till analys</button>}
-              />
-            </div>
-          )}
-
-          <footer className={styles.footer}>
-            Odlarstöd.se · Bidragsagent för hållbara matproducenter · Sverige 🇸🇪
-          </footer>
-        </div>
-      </div>
-    </>
-  )
-}
-
-// ── Helpers ──
-function Field({ label, children }) {
-  return (
-    <div style={{ marginBottom: '20px' }}>
-      <label style={{
-        display: 'block', fontSize: '11px', letterSpacing: '1.5px',
-        textTransform: 'uppercase', color: 'var(--bark)', marginBottom: '8px'
-      }}>{label}</label>
-      {children}
-    </div>
-  )
-}
-
-function CheckItem({ label, checked, onChange }) {
-  return (
-    <button
-      onClick={onChange}
-      style={{
-        display: 'flex', alignItems: 'center', gap: '10px',
-        padding: '10px 12px', background: checked ? 'rgba(74,103,65,0.08)' : 'var(--cream)',
-        border: `1px solid ${checked ? 'var(--moss)' : 'rgba(74,103,65,0.2)'}`,
-        borderRadius: '4px', cursor: 'pointer', fontSize: '12px',
-        color: checked ? 'var(--moss)' : 'var(--soil)',
-        fontFamily: 'DM Mono, monospace', textAlign: 'left',
-        transition: 'all 0.2s'
-      }}
-    >
-      <span style={{
-        width: '16px', height: '16px', flexShrink: 0, display: 'flex',
-        alignItems: 'center', justifyContent: 'center',
-        border: `1.5px solid ${checked ? 'var(--moss)' : 'rgba(74,103,65,0.4)'}`,
-        borderRadius: '3px', background: checked ? 'var(--moss)' : 'transparent',
-        color: 'white', fontSize: '10px'
-      }}>
-        {checked ? '✓' : ''}
-      </span>
-      {label}
-    </button>
-  )
-}
-
-function BtnRow({ left, right }) {
-  return (
-    <div style={{
-      display: 'flex', justifyContent: left && right ? 'space-between' : right ? 'flex-end' : 'flex-start',
-      alignItems: 'center', marginTop: '32px', paddingTop: '24px',
-      borderTop: '1px solid rgba(74,103,65,0.1)'
-    }}>
-      {left}
-      {right}
-    </div>
-  )
 }
