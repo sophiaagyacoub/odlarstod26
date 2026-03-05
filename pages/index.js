@@ -10,22 +10,21 @@ const COUNTIES = [
 ]
 
 const PRODUCTION_TYPES = [
-  { value: 'vegetables', label: '🥦 Grönsaker' },
+  { value: 'vegetables', label: '🥦 Grönsaker & rotfrukter' },
   { value: 'grains', label: '🌾 Spannmål & baljväxter' },
   { value: 'fruits', label: '🍎 Frukt & bär' },
   { value: 'dairy', label: '🥛 Mjölk & mejeri' },
-  { value: 'meat', label: '🐄 Kött' },
-  { value: 'eggs', label: '🥚 Ägg' },
+  { value: 'meat', label: '🐄 Kött & ägg' },
   { value: 'herbs', label: '🌿 Örter & medicinalväxter' },
   { value: 'honey', label: '🍯 Honung & biodling' },
   { value: 'forest', label: '🍄 Skogsprodukter & svamp' },
   { value: 'processed', label: '🫙 Förädlade produkter' },
-  { value: 'aqua', label: '🐟 Fiske & vatten' },
+  { value: 'aqua', label: '🐟 Fiske & vattenbruk' },
 ]
 
 const SALES_CHANNELS = [
   'Gårdsbutik','REKO-ring','Bondens marknad','Restauranger',
-  'Dagligvaruhandel','Grossist','Direktleverans','E-handel','Ännu ej försäljning'
+  'Dagligvaruhandel','Grossist','Direktleverans CSA','E-handel','Ännu ej försäljning'
 ]
 
 const SUSTAINABILITY_METHODS = [
@@ -38,7 +37,7 @@ const SUSTAINABILITY_METHODS = [
   { value: 'pollinators', label: '🐝 Pollinatorvänliga miljöer' },
   { value: 'water', label: '💧 Vattenhushållning' },
   { value: 'renewable', label: '☀️ Förnybar energi på gården' },
-  { value: 'seeds', label: '🌾 Eget frö / kultursorter' },
+  { value: 'seeds', label: '🌾 Eget frö / gamla sorter' },
 ]
 
 const CHALLENGES = [
@@ -51,6 +50,11 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState('')
   const [copied, setCopied] = useState(false)
+  const [topBidrag, setTopBidrag] = useState([])
+  const [selectedBidrag, setSelectedBidrag] = useState(null)
+  const [application, setApplication] = useState('')
+  const [appLoading, setAppLoading] = useState(false)
+  const [appCopied, setAppCopied] = useState(false)
 
   // Form state
   const [name, setName] = useState('')
@@ -99,6 +103,7 @@ export default function Home() {
       })
       const data = await res.json()
       setResult(data.result || data.error || 'Kunde inte hämta analys.')
+      setTopBidrag(data.topBidrag || [])
     } catch {
       setResult('Något gick fel. Kontrollera din internetanslutning och försök igen.')
     } finally {
@@ -110,7 +115,56 @@ export default function Home() {
     setScreen(1); setResult(''); setName(''); setFarm(''); setMunicipality('')
     setCounty(''); setArea(5); setOrgType(''); setProduction([]); setSalesChannels([])
     setTurnover(''); setSustainabilityMethods([]); setSustainabilityGoal(''); setChallenges([])
+    setTopBidrag([]); setSelectedBidrag(null); setApplication(''); setAppLoading(false)
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  async function generateApplication(bidrag) {
+    setSelectedBidrag(bidrag)
+    setApplication('')
+    setScreen(5)
+    setAppLoading(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    try {
+      const res = await fetch('/api/application', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          profile: {
+            name: name || 'Producent',
+            farm: farm || 'Din gård',
+            municipality: municipality || 'okänd kommun',
+            county: county || 'okänt län',
+            area: area + ' ha',
+            orgType: orgType || 'ej angiven',
+            production,
+            salesChannels,
+            turnover: turnover || 'ej angiven',
+            sustainabilityMethods,
+            sustainabilityGoal,
+            challenges,
+          },
+          bidrag,
+        })
+      })
+      const data = await res.json()
+      setApplication(data.result || data.error || 'Kunde inte generera ansökan.')
+    } catch {
+      setApplication('Något gick fel. Försök igen.')
+    } finally {
+      setAppLoading(false)
+    }
+  }
+
+  function downloadDocx() {
+    const text = application
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `ansökan-${selectedBidrag?.namn?.replace(/\s+/g, '-') || 'bidrag'}.txt`
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
   function copyResult() {
@@ -151,8 +205,8 @@ export default function Home() {
               <span className={styles.logoIcon}>🌾</span>
               <span className={styles.logoText}>Odlarstöd.se</span>
             </div>
-            <div className={styles.logoSub}>Hitta bidrag för småskaliga hållbara matproducenter</div>
-            <div className={styles.tagline}>För oss som kämpar för att öka den biologiska mångfalden och Sveriges självförsörjning</div>
+            <div className={styles.logoSub}>Bidragsagent för hållbara matproducenter</div>
+            <div className={styles.tagline}>Stärker den biologiska mångfalden och Sveriges självförsörjning</div>
           </header>
 
           {/* STEPS BAR */}
@@ -348,8 +402,81 @@ export default function Home() {
                 </div>
               )}
 
+              {!loading && topBidrag.length > 0 && (
+                <div style={{ marginTop: '24px' }}>
+                  <div style={{ fontSize: '11px', letterSpacing: '1.5px', textTransform: 'uppercase', color: 'var(--bark)', marginBottom: '12px' }}>
+                    ✍️ Skriv ansökningsutkast
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {topBidrag.map((b, i) => (
+                      <button key={i} onClick={() => generateApplication(b)} style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '14px 16px', background: 'var(--cream)',
+                        border: '1px solid rgba(74,103,65,0.25)', borderRadius: '6px',
+                        cursor: 'pointer', textAlign: 'left', fontFamily: 'DM Mono, monospace'
+                      }}>
+                        <span style={{ fontSize: '12px', color: 'var(--soil)' }}>{b.namn}</span>
+                        <span style={{ fontSize: '11px', color: 'var(--moss)', whiteSpace: 'nowrap', marginLeft: '12px' }}>Skriv utkast →</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <BtnRow
                 left={<button className={styles.btnSecondary} onClick={() => { setScreen(3); window.scrollTo({top:0,behavior:'smooth'}) }}>← Ändra uppgifter</button>}
+              />
+            </div>
+          )}
+
+          {/* ── SCREEN 5: ANSÖKAN ── */}
+          {screen === 5 && (
+            <div className={styles.screen}>
+              <h2 className={styles.sectionTitle}>Ansökningsutkast</h2>
+              <p className={styles.sectionDesc}>{selectedBidrag?.namn} – {selectedBidrag?.utlysare}</p>
+
+              {appLoading && (
+                <div className={styles.card} style={{ textAlign: 'center', padding: '48px' }}>
+                  <div className={styles.loadingDots}><span /><span /><span /></div>
+                  <div style={{ marginTop: '16px', fontSize: '12px', opacity: 0.6 }}>
+                    Skriver ansökningsutkast med dina gårdsuppgifter...
+                  </div>
+                </div>
+              )}
+
+              {!appLoading && application && (
+                <div className={styles.aiResponse}>
+                  <div className={styles.aiLabel}>
+                    <span className={styles.aiDot} />
+                    Utkast för {farm || 'din gård'}
+                  </div>
+                  <div
+                    className={styles.aiContent}
+                    dangerouslySetInnerHTML={{ __html: formatResult(application) }}
+                  />
+                  <div className={styles.resultActions}>
+                    <button className={styles.actionCard} onClick={() => {
+                      navigator.clipboard.writeText(application).then(() => {
+                        setAppCopied(true); setTimeout(() => setAppCopied(false), 2000)
+                      })
+                    }}>
+                      <div className={styles.actionIcon}>{appCopied ? '✓' : '📋'}</div>
+                      <div className={styles.actionLabel}>{appCopied ? 'Kopierad!' : 'Kopiera text'}</div>
+                    </button>
+                    <button className={styles.actionCard} onClick={downloadDocx}>
+                      <div className={styles.actionIcon}>📄</div>
+                      <div className={styles.actionLabel}>Ladda ner</div>
+                    </button>
+                    <button className={styles.actionCard} onClick={() => window.print()}>
+                      <div className={styles.actionIcon}>🖨️</div>
+                      <div className={styles.actionLabel}>Skriv ut</div>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <BtnRow
+                left={<button className={styles.btnSecondary} onClick={() => { setScreen(4); window.scrollTo({top:0,behavior:'smooth'}) }}>← Tillbaka till analys</button>}
               />
             </div>
           )}
