@@ -119,6 +119,30 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  function activateTestMode() {
+    setName('Anna Lindgren')
+    setFarm('Humlebo Gård')
+    setMunicipality('Lindkvists Skogsby')
+    setCounty('Västra Götaland')
+    setArea(5)
+    setOrgType('Enskild firma')
+    setProduction(['vegetables', 'honey', 'herbs'])
+    setSalesChannels(['REKO-ring', 'Gårdsbutik'])
+    setTurnover('100 000 – 500 000 kr')
+    setSustainabilityMethods(['organic', 'pollinators', 'cover-crops'])
+    setSustainabilityGoal('Vi vill anlägga blomsterremsor längs alla åkerkanter för att gynna pollinerare och minska bekämpningsmedel.')
+    setChallenges(['Finansiering', 'Byråkrati & administration'])
+    const mockBidrag = [
+      { id: 'blommande_aker', namn: 'Miljöersättning för blommande åker och fältkant', utlysare: 'Jordbruksverket (EU/CAP)', belopp: 'Varierar per region', deadline: '9 april 2026', ansokan: 'SAM Internet', lank: 'https://jordbruksverket.se', beskrivning: 'Ersättning för att odla pollen- och nektarrika örter.' },
+      { id: 'ekostod', namn: 'Ersättning för ekologisk produktion', utlysare: 'Jordbruksverket (EU/CAP)', belopp: 'ca 1 000–3 600 kr/hektar', deadline: '9 april 2026', ansokan: 'SAM Internet', lank: 'https://jordbruksverket.se', beskrivning: 'Ersättning för certifierad ekologisk produktion.' },
+      { id: 'leader', namn: 'Leader – lokalt ledd utveckling', utlysare: 'Leader LAG-grupper', belopp: '50 000–500 000 kr', deadline: 'Varierar', ansokan: 'leadersverige.se', lank: 'https://leadersverige.se', beskrivning: 'Lokala utvecklingsprojekt på landsbygden.' },
+    ]
+    setTopBidrag(mockBidrag)
+    setResult('**Testläge aktiverat!** Detta är ett simulerat analysresultat för Anna Lindgren på Humlebo Gård.\n\nDu kan nu testa ansökningsfunktionen utan att använda API-krediter. Klicka på "Skriv utkast →" nedan för att testa ansökningshjälpen.')
+    setScreen(4)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   async function generateApplication(bidrag) {
     setSelectedBidrag(bidrag)
     setApplication('')
@@ -481,6 +505,13 @@ export default function Home() {
             </div>
           )}
 
+          <div style={{ textAlign: 'center', padding: '8px', opacity: 0.4 }}>
+            <button onClick={activateTestMode} style={{
+              fontSize: '10px', color: 'var(--bark)', background: 'none',
+              border: '1px dashed rgba(74,103,65,0.3)', borderRadius: '4px',
+              padding: '4px 10px', cursor: 'pointer', fontFamily: 'DM Mono, monospace'
+            }}>🧪 testläge</button>
+          </div>
           <footer className={styles.footer}>
             Odlarstöd.se · Bidragsagent för hållbara matproducenter · Sverige 🇸🇪
           </footer>
