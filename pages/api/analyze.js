@@ -45,15 +45,9 @@ Svara på svenska. Var specifik och praktisk. Prioritera bidrag som är öppna f
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+       model: 'claude-haiku-4-5-20251001',
         max_tokens: 2000,
-        system: 'Du är Odlarstöd.se – en kunnig och varm bidragsrådgivare för hållbara svenska matproducenter. Använd alltid webbsökning för att hitta aktuella utlysningar. Svara alltid på svenska.',
-        tools: [
-          {
-            type: 'web_search_20250305',
-            name: 'web_search',
-          }
-        ],
+        system: 'Du är Odlarstöd.se – en kunnig och varm bidragsrådgivare för hållbara svenska matproducenter. Svara alltid på svenska.',
         messages: [{ role: 'user', content: prompt }],
       }),
     })
