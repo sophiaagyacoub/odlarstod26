@@ -102,8 +102,8 @@ export default function Home() {
         })
       })
       const data = await res.json()
-      setResult(data.result || data.error || 'Kunde inte hämta analys.')
-      setTopBidrag(data.topBidrag || [])
+      setTopBidrag(data.bidrag || [])
+      setResult(data.sammanfattning || data.error || '')
     } catch {
       setResult('Något gick fel. Kontrollera din internetanslutning och försök igen.')
     } finally {
@@ -138,7 +138,7 @@ export default function Home() {
       { id: 'leader', namn: 'Leader – lokalt ledd utveckling', utlysare: 'Leader LAG-grupper', belopp: '50 000–500 000 kr', deadline: 'Varierar', ansokan: 'leadersverige.se', lank: 'https://leadersverige.se', beskrivning: 'Lokala utvecklingsprojekt på landsbygden.' },
     ]
     setTopBidrag(mockBidrag)
-    setResult('**Testläge aktiverat!** Detta är ett simulerat analysresultat för Anna Lindgren på Humlebo Gård.\n\nDu kan nu testa ansökningsfunktionen utan att använda API-krediter. Klicka på "Skriv utkast →" nedan för att testa ansökningshjälpen.')
+    setResult('Vi hittade 3 bidrag som matchar din profil.')
     setScreen(4)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -386,7 +386,7 @@ export default function Home() {
           {screen === 4 && (
             <div className={styles.screen}>
               <h2 className={styles.sectionTitle}>Dina bidragsmöjligheter</h2>
-              <p className={styles.sectionDesc}>Baserat på din profil analyserar agenten relevanta bidrag och stöd.</p>
+              <p className={styles.sectionDesc}>Baserat på din profil har vi matchat relevanta bidrag och stöd.</p>
 
               {loading && (
                 <div className={styles.card} style={{ textAlign: 'center', padding: '48px' }}>
@@ -394,61 +394,78 @@ export default function Home() {
                     <span /><span /><span />
                   </div>
                   <div style={{ marginTop: '16px', fontSize: '12px', opacity: 0.6 }}>
-                    Analyserar din profil och söker igenom Jordbruksverket, Leader, Region & EU-fonder...
-                  </div>
-                </div>
-              )}
-
-              {!loading && result && (
-                <div className={styles.aiResponse}>
-                  <div className={styles.aiLabel}>
-                    <span className={styles.aiDot} />
-                    Bidragsanalys för {farm || 'din gård'}
-                  </div>
-                  <div
-                    className={styles.aiContent}
-                    dangerouslySetInnerHTML={{ __html: formatResult(result) }}
-                  />
-                  <div className={styles.resultActions}>
-                    <button className={styles.actionCard} onClick={copyResult}>
-                      <div className={styles.actionIcon}>{copied ? '✓' : '📋'}</div>
-                      <div className={styles.actionLabel}>{copied ? 'Kopierad!' : 'Kopiera analys'}</div>
-                    </button>
-                    <button className={styles.actionCard} onClick={() => window.print()}>
-                      <div className={styles.actionIcon}>🖨️</div>
-                      <div className={styles.actionLabel}>Skriv ut</div>
-                    </button>
-                    <button className={styles.actionCard} onClick={reset}>
-                      <div className={styles.actionIcon}>🔄</div>
-                      <div className={styles.actionLabel}>Ny sökning</div>
-                    </button>
+                    Söker igenom Jordbruksverket, Leader, Region & EU-fonder...
                   </div>
                 </div>
               )}
 
               {!loading && topBidrag.length > 0 && (
-                <div style={{ marginTop: '24px' }}>
-                  <div style={{ fontSize: '11px', letterSpacing: '1.5px', textTransform: 'uppercase', color: 'var(--bark)', marginBottom: '12px' }}>
-                    ✍️ Skriv ansökningsutkast
+                <>
+                  <div style={{ fontSize: '12px', color: 'var(--moss)', marginBottom: '20px', fontFamily: 'DM Mono, monospace' }}>
+                    ✅ {result}
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                     {topBidrag.map((b, i) => (
-                      <button key={i} onClick={() => generateApplication(b)} style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        padding: '14px 16px', background: 'var(--cream)',
-                        border: '1px solid rgba(74,103,65,0.25)', borderRadius: '6px',
-                        cursor: 'pointer', textAlign: 'left', fontFamily: 'DM Mono, monospace'
+                      <div key={i} style={{
+                        background: 'var(--cream)',
+                        border: '1px solid rgba(74,103,65,0.25)',
+                        borderRadius: '8px',
+                        padding: '18px 20px',
                       }}>
-                        <span style={{ fontSize: '12px', color: 'var(--soil)' }}>{b.namn}</span>
-                        <span style={{ fontSize: '11px', color: 'var(--moss)', whiteSpace: 'nowrap', marginLeft: '12px' }}>Skriv utkast →</span>
-                      </button>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--soil)', marginBottom: '4px', fontFamily: 'DM Mono, monospace' }}>
+                              {b.namn}
+                            </div>
+                            <div style={{ fontSize: '11px', color: 'var(--bark)', marginBottom: '8px' }}>
+                              {b.utlysare}
+                            </div>
+                            <div style={{ fontSize: '11px', color: 'var(--soil)', opacity: 0.8, marginBottom: '10px', lineHeight: '1.5' }}>
+                              {b.beskrivning}
+                            </div>
+                            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: '11px', color: 'var(--moss)', fontFamily: 'DM Mono, monospace' }}>
+                                💰 {b.belopp}
+                              </span>
+                              <span style={{ fontSize: '11px', color: 'var(--bark)', fontFamily: 'DM Mono, monospace' }}>
+                                📅 Deadline: {b.deadline}
+                              </span>
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flexShrink: 0 }}>
+                            <a href={b.lank} target="_blank" rel="noopener noreferrer" style={{
+                              fontSize: '11px', color: 'var(--moss)', textDecoration: 'none',
+                              border: '1px solid var(--moss)', borderRadius: '4px',
+                              padding: '6px 12px', fontFamily: 'DM Mono, monospace',
+                              whiteSpace: 'nowrap'
+                            }}>
+                              Läs mer →
+                            </a>
+                            <button onClick={() => generateApplication(b)} style={{
+                              fontSize: '11px', color: 'white', background: 'var(--moss)',
+                              border: 'none', borderRadius: '4px', padding: '6px 12px',
+                              cursor: 'pointer', fontFamily: 'DM Mono, monospace',
+                              whiteSpace: 'nowrap'
+                            }}>
+                              ✍️ Skriv utkast
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     ))}
                   </div>
+                </>
+              )}
+
+              {!loading && topBidrag.length === 0 && (
+                <div className={styles.card} style={{ textAlign: 'center', padding: '32px' }}>
+                  <div style={{ fontSize: '14px', color: 'var(--bark)' }}>Inga bidrag hittades. Försök igen med fler uppgifter.</div>
                 </div>
               )}
 
               <BtnRow
                 left={<button className={styles.btnSecondary} onClick={() => { setScreen(3); window.scrollTo({top:0,behavior:'smooth'}) }}>← Ändra uppgifter</button>}
+                right={<button className={styles.btnSecondary} onClick={reset}>🔄 Ny sökning</button>}
               />
             </div>
           )}
