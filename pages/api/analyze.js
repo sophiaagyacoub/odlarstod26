@@ -222,63 +222,8 @@ export default async function handler(req, res) {
     .sort((a, b) => b.poang - a.poang)
     .slice(0, 6)
 
-  const bidragJson = JSON.stringify(rankadeBidrag, null, 2)
-
-  const prompt = `Du är en varm och kunnig bidragsrådgivare på Odlarstöd.se.
-
-Här är profilen för en producent:
-- Namn: ${profile.name}, Gård: ${profile.farm}
-- Plats: ${profile.municipality}, ${profile.county}
-- Areal: ${profile.area} hektar
-- Organisationsform: ${profile.orgType}
-- Produktion: ${profile.production?.join(', ') || 'ej angiven'}
-- Försäljningskanaler: ${profile.salesChannels?.join(', ') || 'ej angivna'}
-- Omsättning: ${profile.turnover}
-- Hållbarhetsmetoder: ${profile.sustainabilityMethods?.join(', ') || 'inga angivna'}
-- Hållbarhetsmål: ${profile.sustainabilityGoal || 'ej angivet'}
-- Utmaningar: ${profile.challenges?.join(', ') || 'ej angivna'}
-
-Här är de mest relevanta bidragen för denna producent:
-${bidragJson}
-
-Skriv en personlig och uppmuntrande bidragsanalys på svenska med:
-1. En kort personlig inledning (2 meningar) som visar att du förstår deras situation
-2. För varje bidrag: förklara varför det passar just denna producent, nämn utlysaren, beloppet, ansökningsdeadline och länken
-3. Avsluta med 3 konkreta nästa steg
-
-Var specifik, varm och praktisk. Formatera tydligt med rubriker för varje bidrag.`
-
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1500,
-        system: 'Du är Odlarstöd.se – en kunnig och varm bidragsrådgivare för hållbara svenska matproducenter. Svara alltid på svenska.',
-        messages: [{ role: 'user', content: prompt }],
-      }),
-    })
-
-    if (!response.ok) {
-      const error = await response.json()
-      console.error('Anthropic API error:', error)
-      return res.status(500).json({ error: 'Kunde inte kontakta AI-tjänsten' })
-    }
-
-    const data = await response.json()
-    const text = data.content
-      ?.filter((b) => b.type === 'text')
-      .map((b) => b.text || '')
-      .join('') || ''
-
-    return res.status(200).json({ result: text, topBidrag: rankadeBidrag.slice(0, 3) })
-  } catch (err) {
-    console.error('Server error:', err)
-    return res.status(500).json({ error: 'Serverfel, försök igen' })
-  }
+  return res.status(200).json({
+    bidrag: rankadeBidrag,
+    sammanfattning: `Vi hittade ${rankadeBidrag.length} bidrag som matchar din profil.`
+  })
 }
