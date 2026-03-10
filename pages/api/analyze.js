@@ -103,6 +103,62 @@ const BIDRAG = [
     taggar: ['mellanbygd', 'bergsbygd', 'norrland', 'EU'],
   },
 
+  {
+    id: 'smabondestod',
+    namn: 'Stöd till småbrukare (PSF)',
+    utlysare: 'Jordbruksverket (EU/CAP)',
+    belopp: 'upp till 1 250 euro (klumpsumma)',
+    deadline: '9 april 2026',
+    ansokan: 'SAM Internet (jordbruksverket.se/sam)',
+    lank: 'https://agriculture.ec.europa.eu/common-agricultural-policy/income-support/additional-schemes/payments-small-farmers_sv',
+    beskrivning: 'Förenklat inkomststöd för småbrukare som ersätter gårdsstöd och andra direktstöd med en enkel klumpsumma. Minskar den administrativa bördan.',
+    taggar: ['småbruk', 'alla', 'EU', 'förenkling', 'liten gård'],
+  },
+  {
+    id: 'vallodling',
+    namn: 'Miljöersättning för vallodling',
+    utlysare: 'Jordbruksverket (EU/CAP)',
+    belopp: 'Varierar per region',
+    deadline: '9 april 2026',
+    ansokan: 'SAM Internet (jordbruksverket.se/sam)',
+    lank: 'https://jordbruksverket.se/stod/jordbruk-tradgard-och-rennaring/jordbruksmark/vallodling',
+    beskrivning: 'Ersättning för vallodling som bidrar till kolinlagring, förbättrad jordhälsa och minskat kväveläckage. Ny ersättning sökbar från 2026.',
+    taggar: ['vall', 'gräs', 'djur', 'hållbarhet', 'klimat', 'EU'],
+  },
+  {
+    id: 'notkreatursstod',
+    namn: 'Nötkreatursstöd',
+    utlysare: 'Jordbruksverket (EU/CAP)',
+    belopp: 'Varierar per djur och produktion',
+    deadline: '9 april 2026',
+    ansokan: 'SAM Internet (jordbruksverket.se/sam)',
+    lank: 'https://jordbruksverket.se/stod/jordbruk-tradgard-och-rennaring/djur/notkreatur',
+    beskrivning: 'Kopplat stöd för att behålla lönsam mjölk- och köttproduktion. Bidrar till biologisk mångfald och öppna betesmarker.',
+    taggar: ['nötkreatur', 'ko', 'kött', 'mjölk', 'djur', 'betesmark', 'EU'],
+  },
+  {
+    id: 'djurvalfard',
+    namn: 'Djurvälfärdsersättning',
+    utlysare: 'Jordbruksverket (EU/CAP)',
+    belopp: 'Varierar per djurslag (mjölkkor: +1 000 kr/ko från 2026)',
+    deadline: '9 april 2026',
+    ansokan: 'SAM Internet (jordbruksverket.se/sam)',
+    lank: 'https://jordbruksverket.se/stod/jordbruk-tradgard-och-rennaring/djur/djurvalfard',
+    beskrivning: 'Ersättning för förbättrad djurvälfärd för får, mjölkkor och suggor. Förstärkt med 1 000 kr/ko från 2026.',
+    taggar: ['djur', 'får', 'mjölk', 'ko', 'sugga', 'gris', 'djurvälfärd', 'EU'],
+  },
+  {
+    id: 'hotade_raser',
+    namn: 'Miljöersättning för hotade husdjursraser',
+    utlysare: 'Jordbruksverket (EU/CAP)',
+    belopp: 'Varierar per ras och djurslag',
+    deadline: '9 april 2026',
+    ansokan: 'SAM Internet (jordbruksverket.se/sam)',
+    lank: 'https://jordbruksverket.se/stod/jordbruk-tradgard-och-rennaring/djur/hotade-husdjursraser',
+    beskrivning: 'Ersättning för att hålla gamla lantraser av nötkreatur, grisar, får, getter eller fjäderfä. Bevarar genetisk mångfald och kulturarv.',
+    taggar: ['lantraser', 'biologisk mångfald', 'djur', 'får', 'nötkreatur', 'fjäderfä', 'EU'],
+  },
+
   // ─── Nationella stöd ───
   {
     id: 'klimatklivet',
@@ -184,6 +240,19 @@ const BIDRAG = [
     lank: 'https://jordbruksverket.se/stod/jordbruk-tradgard-och-rennaring/biodling',
     beskrivning: 'Stöd för bin och biodling, inkl. stöd för att bekämpa varroa och för utbildning.',
     taggar: ['biodling', 'honung', 'pollinerare', 'bin', 'EU'],
+  },
+
+  // ─── LONA ───
+  {
+    id: 'lona',
+    namn: 'LONA – Lokala naturvårdssatsningen',
+    utlysare: 'Naturvårdsverket / Länsstyrelsen (nationellt)',
+    belopp: 'upp till 50% av projektkostnad (90% för våtmarker)',
+    deadline: '1 december varje år (inför kommande år)',
+    ansokan: 'Ansökan via din kommun (naturvardsverket.se/lona)',
+    lank: 'https://www.naturvardsverket.se/vagledning-och-stod/bidrag-och-ersattningar/lona-lokala-naturvardssatsningen/',
+    beskrivning: 'Bidrag för lokala naturvårdsprojekt – biologisk mångfald, pollinatörer, våtmarker och betesmarker. Du som markägare kan initiera projektet, men ansökan måste gå via kommunen. Kontakta din kommuns miljöstrateg med din idé – många kommuner är positiva. Deadline för ansökan är 1 december varje år.',
+    taggar: ['biologisk mångfald', 'natur', 'pollinerare', 'våtmarker', 'betesmark', 'hållbarhet', 'nationell'],
   },
 ]
 
