@@ -529,6 +529,23 @@ export default function Home() {
               padding: '4px 10px', cursor: 'pointer', fontFamily: 'DM Mono, monospace'
             }}>🧪 testläge</button>
           </div>
+          <div style={{
+            margin: '32px 0 16px',
+            padding: '20px 24px',
+            background: 'rgba(74,103,65,0.06)',
+            borderRadius: '8px',
+            borderLeft: '3px solid var(--moss)',
+            fontFamily: 'DM Mono, monospace',
+          }}>
+            <div style={{ fontSize: '12px', color: 'var(--moss)', marginBottom: '8px' }}>🌱 Om Odlarstöd.se</div>
+            <p style={{ fontSize: '11px', color: 'var(--soil)', lineHeight: '1.7', margin: 0 }}>
+              Odlarstöd.se är byggt av <strong>Sophia Yacoub-Wallin</strong> – lärare i geografi och samhällskunskap, hobbyodlare och brinnande engagerad i hållbarhet och biologisk mångfald. Verktyget är ett sätt att bidra till ett mer hållbart matsystem genom att göra det enklare för småskaliga producenter att hitta och söka de bidrag de har rätt till.
+            </p>
+            <p style={{ fontSize: '11px', color: 'var(--bark)', marginTop: '8px', marginBottom: 0 }}>
+              Frågor eller feedback? Maila <a href="mailto:sophia.ag.yacoub@gmail.com" style={{ color: 'var(--moss)' }}>sophia.ag.yacoub@gmail.com</a>
+            </p>
+          </div>
+
           <footer className={styles.footer}>
             Odlarstöd.se · Bidragsagent för hållbara matproducenter · Sverige 🇸🇪
           </footer>
