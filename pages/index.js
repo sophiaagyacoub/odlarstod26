@@ -47,6 +47,7 @@ const CHALLENGES = [
 
 export default function Home() {
   const [screen, setScreen] = useState(1)
+  const [showAbout, setShowAbout] = useState(false)
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState('')
   const [copied, setCopied] = useState(false)
@@ -225,13 +226,51 @@ export default function Home() {
         <div className={styles.container}>
           {/* HEADER */}
           <header className={styles.header}>
-            <div className={styles.logoArea}>
-              <span className={styles.logoIcon}>🌾</span>
-              <span className={styles.logoText}>Odlarstöd.se</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className={styles.logoArea}>
+                <span className={styles.logoIcon}>🌾</span>
+                <span className={styles.logoText}>Odlarstöd.se</span>
+              </div>
+              <button onClick={() => setShowAbout(true)} style={{
+                fontSize: '11px', color: 'var(--moss)', background: 'none',
+                border: '1px solid rgba(74,103,65,0.4)', borderRadius: '4px',
+                padding: '5px 12px', cursor: 'pointer', fontFamily: 'DM Mono, monospace',
+              }}>Om Odlarstöd.se</button>
             </div>
             <div className={styles.logoSub}>Bidragsagent för hållbara matproducenter</div>
             <div className={styles.tagline}>Stärker den biologiska mångfalden och Sveriges självförsörjning</div>
           </header>
+
+          {/* ABOUT MODAL */}
+          {showAbout && (
+            <div onClick={() => setShowAbout(false)} style={{
+              position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
+              zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: '24px',
+            }}>
+              <div onClick={e => e.stopPropagation()} style={{
+                background: 'var(--cream)', borderRadius: '10px', padding: '32px',
+                maxWidth: '480px', width: '100%', fontFamily: 'DM Mono, monospace',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+              }}>
+                <div style={{ fontSize: '13px', color: 'var(--moss)', marginBottom: '16px', fontWeight: 600 }}>🌱 Om Odlarstöd.se</div>
+                <p style={{ fontSize: '12px', color: 'var(--soil)', lineHeight: '1.8', margin: '0 0 12px' }}>
+                  Odlarstöd.se är byggt av <strong>Sophia Yacoub-Wallin</strong> – lärare i geografi och samhällskunskap, hobbyodlare och brinnande engagerad i hållbarhet och biologisk mångfald.
+                </p>
+                <p style={{ fontSize: '12px', color: 'var(--soil)', lineHeight: '1.8', margin: '0 0 20px' }}>
+                  Verktyget är ett sätt att bidra till ett mer hållbart matsystem genom att göra det enklare för småskaliga producenter att hitta och söka de bidrag de har rätt till.
+                </p>
+                <p style={{ fontSize: '11px', color: 'var(--bark)', margin: '0 0 20px' }}>
+                  Frågor eller feedback? Maila <a href="mailto:sophia.ag.yacoub@gmail.com" style={{ color: 'var(--moss)' }}>sophia.ag.yacoub@gmail.com</a>
+                </p>
+                <button onClick={() => setShowAbout(false)} style={{
+                  width: '100%', padding: '10px', background: 'var(--moss)', color: 'white',
+                  border: 'none', borderRadius: '6px', cursor: 'pointer',
+                  fontFamily: 'DM Mono, monospace', fontSize: '12px',
+                }}>Stäng</button>
+              </div>
+            </div>
+          )}
 
           {/* STEPS BAR */}
           <div className={styles.stepsBar}>
@@ -529,23 +568,6 @@ export default function Home() {
               padding: '4px 10px', cursor: 'pointer', fontFamily: 'DM Mono, monospace'
             }}>🧪 testläge</button>
           </div>
-          <div style={{
-            margin: '32px 0 16px',
-            padding: '20px 24px',
-            background: 'rgba(74,103,65,0.06)',
-            borderRadius: '8px',
-            borderLeft: '3px solid var(--moss)',
-            fontFamily: 'DM Mono, monospace',
-          }}>
-            <div style={{ fontSize: '12px', color: 'var(--moss)', marginBottom: '8px' }}>🌱 Om Odlarstöd.se</div>
-            <p style={{ fontSize: '11px', color: 'var(--soil)', lineHeight: '1.7', margin: 0 }}>
-              Odlarstöd.se är byggt av <strong>Sophia Yacoub-Wallin</strong> – lärare i geografi och samhällskunskap, hobbyodlare och brinnande engagerad i hållbarhet och biologisk mångfald. Verktyget är ett sätt att bidra till ett mer hållbart matsystem genom att göra det enklare för småskaliga producenter att hitta och söka de bidrag de har rätt till.
-            </p>
-            <p style={{ fontSize: '11px', color: 'var(--bark)', marginTop: '8px', marginBottom: 0 }}>
-              Frågor eller feedback? Maila <a href="mailto:sophia.ag.yacoub@gmail.com" style={{ color: 'var(--moss)' }}>sophia.ag.yacoub@gmail.com</a>
-            </p>
-          </div>
-
           <footer className={styles.footer}>
             Odlarstöd.se · Bidragsagent för hållbara matproducenter · Sverige 🇸🇪
           </footer>
